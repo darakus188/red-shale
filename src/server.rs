@@ -32,7 +32,8 @@ async fn handle_client(socket: TcpStream, mut tx: Sender<String>) -> Result<(), 
             Some(Ok(q)) => q,
             _ => return Err("no query received".into()),
         };
-        client.send(query.clone()).await?;
+        let response = format!("You sent: {}", query);
+        client.send(response).await?;
         let _ = tx.send(query).await;
     }
 }
