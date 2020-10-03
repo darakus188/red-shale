@@ -39,16 +39,14 @@ async fn handle_client(socket: TcpStream, mut tx: Sender<String>, mut rx: Receiv
     println!("Incoming connection from {}", remote_ip);
 
     let mut client = Framed::new(socket, LinesCodec::new_with_max_length(1024));
+    let mut player = crate::player::new(client).await;
     loop {
         tokio::select! {
-            query = client.next() => {
-                println!("Hit client.next()");
-                let _ = tx.send(query.unwrap().unwrap().clone());
+            query = player.conn.next() => {
+                let _ = tx.send(format!("{}: {}", player.name ,query.unwrap().unwrap().clone()));
             }
             query = rx.recv() => {
-                // TODO
-                println!("Hit rx.recv");
-                let _ = client.send(query.unwrap().clone()).await?;
+                let _ = player.conn.send(query.unwrap().clone()).await;
             }
         }
     }
@@ -61,7 +59,6 @@ async fn respond(mut rx: Receiver<String>, tx: Sender<String>) -> Result<(), Box
             Ok(x) => x,
             Err(e) => panic!("received nothing and exploded."),
         };
-        println!("Receiver got: {}", received);
         tx.send(received).unwrap();
     }
 }
