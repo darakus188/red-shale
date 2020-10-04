@@ -17,6 +17,7 @@ impl Player {
 pub async fn new(mut conn: LineStream) -> Player {
     let _ = conn.send("What is your name? ").await;
     let name = conn.next().await.unwrap().unwrap();
+    let _ = conn.send(format!("Welcome, {}", name)).await;
     Player {
         name,
         conn,
