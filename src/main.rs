@@ -1,3 +1,4 @@
+// main.rs
 use std::error::Error;
 
 mod server;
